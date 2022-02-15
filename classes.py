@@ -17,6 +17,7 @@ class Game:
         self.__init__(20,15,40)
 
     def freeze(self):
+        self.score+=1
         for p in self.active_block.image():
             x = self.active_block.x + p % 4
             y = self.active_block.y + p // 4

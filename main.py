@@ -1,5 +1,3 @@
-import math
-from random import randint, random
 import pygame, classes
 
 pygame.init()
@@ -32,6 +30,8 @@ while running:
     if board.active_block == None:
         print("NEW BLOCK CREATED")
         board.active_block = classes.Block(6, 0)
+        if board.active_block.intersects(board):
+            board.reset()
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -76,6 +76,11 @@ while running:
             i = x // 4
             j = x % 4
             pygame.draw.rect(screen,classes.colors[board.active_block.col],[x0+board.side*(board.active_block.x+j),y0+board.side*(board.active_block.y+i),board.side-2, board.side-2])
+
+
+    #rendering current score
+    text = pygame.font.SysFont('Calibri', 25, True, False).render("Score: "+str(board.score),True,WHITE)
+    screen.blit(text,(0,0))
 
     pygame.display.update()
 
