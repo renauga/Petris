@@ -24,13 +24,15 @@ while running:
     counter+=1
     if counter>100000:
         counter = 0
+
+    if board.active_block is not None:
+        if counter % 100 == 0: 
+            board.active_block.move_down(board)
     
     if board.active_block == None:
         print("NEW BLOCK CREATED")
         board.active_block = classes.Block(6, 0)
     
-
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -38,24 +40,22 @@ while running:
             if event.key == pygame.K_SPACE:
                 board.reset()
             if event.key == pygame.K_UP:
-                board.active_block.rotate()
+                board.active_block.rotate(board)
             if event.key == pygame.K_RIGHT:
-                board.active_block.move_right()
+                board.active_block.move_right(board)
             if event.key == pygame.K_LEFT:
-                board.active_block.move_left()
+                board.active_block.move_left(board)
             if event.key == pygame.K_DOWN:
                 pressing_down = True
-                board.active_block.move_down()
+                board.active_block.move_down(board)
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_DOWN:
                 pressing_down = False
 
 
     if board.active_block is not None:
-        if counter % 100 == 0: 
-            board.active_block.move_down()
         if pressing_down and counter % 25 == 0: 
-            board.active_block.move_down()
+            board.active_block.move_down(board)
     
     #rendering black screen
     screen.fill(BLACK)
@@ -73,8 +73,8 @@ while running:
     #rendering current active block
     if board.active_block is not None:
         for x in board.active_block.image():
-            i = math.floor(x/4)
-            j = x%4
+            i = x // 4
+            j = x % 4
             pygame.draw.rect(screen,classes.colors[board.active_block.col],[x0+board.side*(board.active_block.x+j),y0+board.side*(board.active_block.y+i),board.side-2, board.side-2])
 
     pygame.display.update()
