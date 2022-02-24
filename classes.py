@@ -1,4 +1,5 @@
 import random
+from typing import List
 
 colors = [(0,0,0), (255,0,0), (0,255,0), (0,0,255)]
 
@@ -17,12 +18,35 @@ class Game:
         self.__init__(20,15,40)
 
     def freeze(self):
-        self.score+=1
         for p in self.active_block.image():
             x = self.active_block.x + p % 4
             y = self.active_block.y + p // 4
             self.color[y][x] = self.active_block.col
         self.active_block = None
+        self.line_destruct()
+
+    def line_destruct(self):
+        lines_destroyed = 0
+        stk = []
+        for i in range(self.height):
+            all_filled = True
+            line = List.copy(self.color[i])
+            for j in range(self.width):
+                if self.color[i][j]==0:
+                    all_filled=False
+                self.color[i][j]=0
+            if all_filled:
+                lines_destroyed+=1
+            else:
+                stk.append(line)
+        j=self.height-1
+        while len(stk)>0:
+            self.color[j] = stk.pop()
+            j-=1
+        self.score+=lines_destroyed
+                
+            
+
 
 
 class Block:
@@ -70,7 +94,7 @@ class Block:
         if self.intersects(board):
             self.x+=1
 
-    def move_down(self,board):
+    def move_down(self,board:Game):
         self.y+=1
         if self.intersects(board):
             self.y-=1
