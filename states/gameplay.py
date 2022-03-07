@@ -107,4 +107,4 @@ class Gameplay(state_machine.GameState):
         if self.game_over:
             status_text = "Game Over! Press Enter to save score or Backspace to keep playing"
         render_text = font.render(status_text,True,WHITE)
-        surface.blit(render_text,(self.screen_rect.centerx-(render_text.get_width()/2),0))
+        surface.blit(render_text,(self.screen_rect.centerx-(render_text.get_width()/2),40))
