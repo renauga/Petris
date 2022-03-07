@@ -6,24 +6,43 @@ class Gameplay(state_machine.GameState):
 
     def __init__(self):
         super(Gameplay,self).__init__()
+        self.next_state = "SPLASH"
 
     def startup(self, persistent):
         super().startup(persistent)
         self.user_name = self.persist["username"]
         self.board = classes.Board()
+        self.start_game()
+
+    def start_game(self):
+        self.board.reset()
         self.counter = 0
         self.pause = False
+        self.game_over = False
 
+    def save_score(self):
+        #TODO:store score
+        print(self.user_name)
+        print(self.board.score)
+        pass
     
     def get_events(self,events):
         for event in events:
             if event.type == pg.QUIT:
                 self.quit = True
             if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    self.done = True
+                    break
+                if event.key == pg.K_BACKSPACE:
+                    self.start_game()
+                    break
+                if self.game_over:
+                    if event.key == pg.K_RETURN:
+                        self.save_score()
+                    return
                 if event.key == pg.K_p:
                     self.pause = not self.pause
-                if event.key == pg.K_SPACE:
-                    self.board.reset()
                 if self.pause:
                     return
                 if event.key == pg.K_UP:
@@ -36,7 +55,7 @@ class Gameplay(state_machine.GameState):
                     self.board.active_block.move_down()
 
     def update(self, dt):
-        if self.pause:
+        if self.pause or self.game_over:
             return
 
         self.counter+=1
@@ -46,17 +65,18 @@ class Gameplay(state_machine.GameState):
         if self.board.active_block is not None:
             if self.counter % 20 == 0: 
                 self.board.active_block.move_down()
-        
-        if self.board.active_block == None:
-            print("NEW BLOCK CREATED")
-            self.board.active_block = classes.Block(6, 0, self.board)
-            if self.board.active_block.intersects():
-                self.board.reset()
 
         if self.board.active_block is not None:
             keys = pg.key.get_pressed()
             if keys[pg.K_DOWN] and self.counter % 3 == 0:
                 self.board.active_block.move_down()
+
+        if self.board.active_block == None:
+            print("NEW BLOCK CREATED")
+            self.board.active_block = classes.Block(6, 0, self.board)
+            if self.board.active_block.intersects():
+                self.game_over = True
+
 
     def draw(self, surface):
         #rendering black screen
@@ -82,6 +102,10 @@ class Gameplay(state_machine.GameState):
         font = pg.font.SysFont('Calibri', 25, True, False)
         text = font.render("Score: "+str(self.board.score),True,WHITE)
         surface.blit(text,(0,0))
+        status_text = ""
         if self.pause:
-            pause_text = font.render("Game paused!",True,WHITE)
-            surface.blit(pause_text,(self.screen_rect.centerx-(pause_text.get_width()/2),0))
+            status_text = "Game Paused!"
+        if self.game_over:
+            status_text = "Game Over! Press Enter to save score or Backspace to keep playing"
+        render_text = font.render(status_text,True,WHITE)
+        surface.blit(render_text,(self.screen_rect.centerx-(render_text.get_width()/2),0))
