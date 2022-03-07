@@ -6,35 +6,34 @@ class Gameplay(state_machine.GameState):
 
     def __init__(self):
         super(Gameplay,self).__init__()
-        self.board = classes.Board()
-        self.counter = 0
-        self.pause = False
 
     def startup(self, persistent):
         super().startup(persistent)
+        self.user_name = self.persist["username"]
         self.board = classes.Board()
         self.counter = 0
         self.pause = False
 
     
-    def get_event(self,event):
-        if event.type == pg.QUIT:
-            self.quit = True
-        if event.type == pg.KEYDOWN:
-            if event.key == pg.K_p:
-                self.pause = not self.pause
-            if event.key == pg.K_SPACE:
-                self.board.reset()
-            if self.pause:
-                return
-            if event.key == pg.K_UP:
-                self.board.active_block.rotate()
-            if event.key == pg.K_RIGHT:
-                self.board.active_block.move_right()
-            if event.key == pg.K_LEFT:
-                self.board.active_block.move_left()
-            if event.key == pg.K_DOWN:
-                self.board.active_block.move_down()
+    def get_events(self,events):
+        for event in events:
+            if event.type == pg.QUIT:
+                self.quit = True
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_p:
+                    self.pause = not self.pause
+                if event.key == pg.K_SPACE:
+                    self.board.reset()
+                if self.pause:
+                    return
+                if event.key == pg.K_UP:
+                    self.board.active_block.rotate()
+                if event.key == pg.K_RIGHT:
+                    self.board.active_block.move_right()
+                if event.key == pg.K_LEFT:
+                    self.board.active_block.move_left()
+                if event.key == pg.K_DOWN:
+                    self.board.active_block.move_down()
 
     def update(self, dt):
         if self.pause:

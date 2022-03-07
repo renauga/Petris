@@ -27,8 +27,7 @@ class Game(object):
         
     def event_loop(self):
         """Events are passed for handling to the current state."""
-        for event in pg.event.get():
-            self.state.get_event(event)
+        self.state.get_events(pg.event.get())
             
     def flip_state(self):
         """Switch to the next game state."""
@@ -88,7 +87,7 @@ class GameState(object):
         """
         self.persist = persistent        
         
-    def get_event(self, event):
+    def get_events(self, events):
         """
         Handle a single event passed by the Game object.
         """
