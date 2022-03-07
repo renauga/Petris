@@ -1,88 +1,82 @@
-import pygame, classes
+import pygame as pg 
+import classes
+from constants import *
 
-pygame.init()
+if __name__ == "__main__":
+    pg.init()
 
-screen = pygame.display.set_mode((800,900))
-WHITE = (255,255,255)
-GRAY = (127,127,127)
-BLACK = (0,0,0)
+    screen = pg.display.set_mode((800,900))
 
-x0 = 100
-y0 = 50
+    board = classes.Board()
 
-board = classes.Game(20,15,40)
+    running = True
+
+    counter = 0
+
+    while running:
 
 
-running = True
+        
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_SPACE:
+                    board.reset()
+                if event.key == pg.K_UP:
+                    board.active_block.rotate(board)
+                if event.key == pg.K_RIGHT:
+                    board.active_block.move_right(board)
+                if event.key == pg.K_LEFT:
+                    board.active_block.move_left(board)
+                if event.key == pg.K_DOWN:
+                    board.active_block.move_down(board)
 
-pressing_down = False
+        counter+=1
+        if counter>100000:
+            counter = 0
 
-counter = 0 
-while running:
-    counter+=1
-    if counter>100000:
-        counter = 0
-
-    if board.active_block is not None:
-        if counter % 100 == 0: 
-            board.active_block.move_down(board)
-    
-    if board.active_block == None:
-        print("NEW BLOCK CREATED")
-        board.active_block = classes.Block(6, 0)
-        if board.active_block.intersects(board):
-            board.reset()
-    
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                board.reset()
-            if event.key == pygame.K_UP:
-                board.active_block.rotate(board)
-            if event.key == pygame.K_RIGHT:
-                board.active_block.move_right(board)
-            if event.key == pygame.K_LEFT:
-                board.active_block.move_left(board)
-            if event.key == pygame.K_DOWN:
-                pressing_down = True
+        if board.active_block is not None:
+            if counter % 100 == 0: 
                 board.active_block.move_down(board)
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_DOWN:
-                pressing_down = False
+        
+        if board.active_block == None:
+            print("NEW BLOCK CREATED")
+            board.active_block = classes.Block(6, 0)
+            if board.active_block.intersects(board):
+                board.reset()
+
+        if board.active_block is not None:
+            keys = pg.key.get_pressed()
+            if keys[pg.K_DOWN] and counter % 25 == 0: 
+                board.active_block.move_down(board)
+        
+        #rendering black screen
+        screen.fill(BLACK)
+
+        #rendering board
+        for i in range(BOARD_HEIGHT):
+            for j in range(BOARD_WIDTH):
+                #rendering empty board
+                pg.draw.rect(screen,WHITE,[x0+BOARD_SIDE*j,y0+BOARD_SIDE*i,BOARD_SIDE, BOARD_SIDE],1)
+                #rendering colors
+                if board.color[i][j]>0:
+                    pg.draw.rect(screen,classes.colors[board.color[i][j]],[x0+BOARD_SIDE*j+1,y0+BOARD_SIDE*i+1,BOARD_SIDE-2, BOARD_SIDE-2])
+
+                
+        #rendering current active block
+        if board.active_block is not None:
+            for x in board.active_block.image():
+                i = x // 4
+                j = x % 4
+                pg.draw.rect(screen,classes.colors[board.active_block.col],[x0+BOARD_SIDE*(board.active_block.x+j),y0+BOARD_SIDE*(board.active_block.y+i),BOARD_SIDE-2, BOARD_SIDE-2])
 
 
-    if board.active_block is not None:
-        if pressing_down and counter % 25 == 0: 
-            board.active_block.move_down(board)
-    
-    #rendering black screen
-    screen.fill(BLACK)
+        #rendering current score
+        text = pg.font.SysFont('Calibri', 25, True, False).render("Score: "+str(board.score),True,WHITE)
+        screen.blit(text,(0,0))
 
-    #rendering board
-    for i in range(board.height):
-        for j in range(board.width):
-            #rendering empty board
-            pygame.draw.rect(screen,WHITE,[x0+board.side*j,y0+board.side*i,board.side, board.side],1)
-            #rendering colors
-            if board.color[i][j]>0:
-               pygame.draw.rect(screen,classes.colors[board.color[i][j]],[x0+board.side*j+1,y0+board.side*i+1,board.side-2, board.side-2])
-
-            
-    #rendering current active block
-    if board.active_block is not None:
-        for x in board.active_block.image():
-            i = x // 4
-            j = x % 4
-            pygame.draw.rect(screen,classes.colors[board.active_block.col],[x0+board.side*(board.active_block.x+j),y0+board.side*(board.active_block.y+i),board.side-2, board.side-2])
+        pg.display.update()
 
 
-    #rendering current score
-    text = pygame.font.SysFont('Calibri', 25, True, False).render("Score: "+str(board.score),True,WHITE)
-    screen.blit(text,(0,0))
-
-    pygame.display.update()
-
-
-pygame.quit()
+    pg.quit()

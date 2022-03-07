@@ -1,15 +1,11 @@
 import random
 from typing import List
+from constants import BOARD_HEIGHT, BOARD_WIDTH, colors
 
-colors = [(0,0,0), (255,0,0), (0,255,0), (0,0,255)]
 
-
-class Game:
-    def __init__(self, height, width, side):
-        self.height = height
-        self.width = width
-        self.side = side
-        self.color = [[0]*self.width for i in range(self.height)]
+class Board:
+    def __init__(self):
+        self.color = [[0]*BOARD_WIDTH for i in range(BOARD_HEIGHT)]
         self.score = 0
         self.active_block = None
 
@@ -28,7 +24,7 @@ class Game:
     def line_destruct(self):
         lines_destroyed = 0
         stk = []
-        for i in range(self.height):
+        for i in range(BOARD_HEIGHT):
             all_filled = True
             line = List.copy(self.color[i])
             for j in range(self.width):
@@ -39,7 +35,7 @@ class Game:
                 lines_destroyed+=1
             else:
                 stk.append(line)
-        j=self.height-1
+        j=BOARD_HEIGHT-1
         while len(stk)>0:
             self.color[j] = stk.pop()
             j-=1
@@ -67,11 +63,11 @@ class Block:
         self.typ = random.randint(0,len(self.figures)-1)
         self.col = random.randint(1,len(colors)-1)
 
-    def intersects(self, board:Game):
+    def intersects(self, board:Board):
         for p in self.image():
             x = self.x + p % 4
             y = self.y + p // 4
-            if y<0 or y>=board.height or x<0 or x>=board.width or board.color[y][x]>0:
+            if y<0 or y>=BOARD_HEIGHT or x<0 or x>=BOARD_WIDTH or board.color[y][x]>0:
                 return True
         return False
 
@@ -94,7 +90,7 @@ class Block:
         if self.intersects(board):
             self.x+=1
 
-    def move_down(self,board:Game):
+    def move_down(self,board:Board):
         self.y+=1
         if self.intersects(board):
             self.y-=1
