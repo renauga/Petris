@@ -7,11 +7,11 @@ class Board:
     def __init__(self):
         self.color = [[0]*BOARD_WIDTH for i in range(BOARD_HEIGHT)]
         self.score = 0
-        self.active_block = None
+        self.active_block = Block(6,0,self)
 
     def reset(self):
         print("BOARD RESET")
-        self.__init__(20,15,40)
+        self.__init__()
 
     def freeze(self):
         for p in self.active_block.image():
@@ -27,7 +27,7 @@ class Board:
         for i in range(BOARD_HEIGHT):
             all_filled = True
             line = List.copy(self.color[i])
-            for j in range(self.width):
+            for j in range(BOARD_WIDTH):
                 if self.color[i][j]==0:
                     all_filled=False
                 self.color[i][j]=0
@@ -56,45 +56,47 @@ class Block:
     ]
 
 
-    def __init__(self,x,y):
+    def __init__(self, x, y, board):
         self.x = x
         self.y = y
         self.rot = 0
-        self.typ = random.randint(0,len(self.figures)-1)
+        self.board = board
+        #self.typ = random.randint(0,len(self.figures)-1)
+        self.typ = 3
         self.col = random.randint(1,len(colors)-1)
 
-    def intersects(self, board:Board):
+    def intersects(self):
         for p in self.image():
             x = self.x + p % 4
             y = self.y + p // 4
-            if y<0 or y>=BOARD_HEIGHT or x<0 or x>=BOARD_WIDTH or board.color[y][x]>0:
+            if y<0 or y>=BOARD_HEIGHT or x<0 or x>=BOARD_WIDTH or self.board.color[y][x]>0:
                 return True
         return False
 
     def image(self):
         return self.figures[self.typ][self.rot]
 
-    def rotate(self,board):
+    def rotate(self):
         old_rot=self.rot
         self.rot = (self.rot+1)%(len(self.figures[self.typ]))
-        if self.intersects(board):
+        if self.intersects():
             self.rot=old_rot
 
-    def move_right(self,board):
+    def move_right(self):
         self.x+=1
-        if self.intersects(board):
+        if self.intersects():
             self.x-=1
  
-    def move_left(self,board):
+    def move_left(self):
         self.x-=1
-        if self.intersects(board):
+        if self.intersects():
             self.x+=1
 
-    def move_down(self,board:Board):
+    def move_down(self):
         self.y+=1
-        if self.intersects(board):
+        if self.intersects():
             self.y-=1
-            board.freeze()
+            self.board.freeze()
 
 
 
