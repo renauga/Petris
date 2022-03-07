@@ -1,6 +1,7 @@
 import state_machine, classes
 import pygame as pg
 from constants import *
+import utils.score_storage as storage
 
 class Gameplay(state_machine.GameState):
 
@@ -21,10 +22,7 @@ class Gameplay(state_machine.GameState):
         self.game_over = False
 
     def save_score(self):
-        #TODO:store score
-        print(self.user_name)
-        print(self.board.score)
-        pass
+        storage.store_score(self.user_name, self.board.score)
     
     def get_events(self,events):
         for event in events:
@@ -40,6 +38,7 @@ class Gameplay(state_machine.GameState):
                 if self.game_over:
                     if event.key == pg.K_RETURN:
                         self.save_score()
+                        self.start_game()
                     return
                 if event.key == pg.K_p:
                     self.pause = not self.pause
