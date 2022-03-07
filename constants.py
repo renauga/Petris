@@ -10,3 +10,6 @@ y0 = 50 # top left y-coordiate of board
 BOARD_HEIGHT = 20
 BOARD_WIDTH = 15
 BOARD_SIDE = 40
+
+SCREEN_HEIGHT = 900
+SCREEN_WIDTH = 1200

@@ -8,19 +8,25 @@ class Gameplay(state_machine.GameState):
         super(Gameplay,self).__init__()
         self.board = classes.Board()
         self.counter = 0
+        self.pause = False
 
     def startup(self, persistent):
         super().startup(persistent)
         self.board = classes.Board()
         self.counter = 0
+        self.pause = False
 
     
     def get_event(self,event):
         if event.type == pg.QUIT:
-                self.quit = True
+            self.quit = True
         if event.type == pg.KEYDOWN:
+            if event.key == pg.K_p:
+                self.pause = not self.pause
             if event.key == pg.K_SPACE:
                 self.board.reset()
+            if self.pause:
+                return
             if event.key == pg.K_UP:
                 self.board.active_block.rotate()
             if event.key == pg.K_RIGHT:
@@ -31,9 +37,13 @@ class Gameplay(state_machine.GameState):
                 self.board.active_block.move_down()
 
     def update(self, dt):
+        if self.pause:
+            return
+
         self.counter+=1
         if self.counter>10000:
             self.counter = 0
+        
         if self.board.active_block is not None:
             if self.counter % 20 == 0: 
                 self.board.active_block.move_down()
@@ -46,7 +56,7 @@ class Gameplay(state_machine.GameState):
 
         if self.board.active_block is not None:
             keys = pg.key.get_pressed()
-            if keys[pg.K_DOWN] and self.counter % 3 == 0: 
+            if keys[pg.K_DOWN] and self.counter % 3 == 0:
                 self.board.active_block.move_down()
 
     def draw(self, surface):
@@ -61,8 +71,7 @@ class Gameplay(state_machine.GameState):
                 #rendering colors
                 if self.board.color[i][j]>0:
                     pg.draw.rect(surface,classes.colors[self.board.color[i][j]],[x0+BOARD_SIDE*j+1,y0+BOARD_SIDE*i+1,BOARD_SIDE-2, BOARD_SIDE-2])
-
-                
+      
         #rendering current active block
         if self.board.active_block is not None:
             for x in self.board.active_block.image():
@@ -70,7 +79,10 @@ class Gameplay(state_machine.GameState):
                 j = x % 4
                 pg.draw.rect(surface,classes.colors[self.board.active_block.col],[x0+BOARD_SIDE*(self.board.active_block.x+j),y0+BOARD_SIDE*(self.board.active_block.y+i),BOARD_SIDE-2, BOARD_SIDE-2])
 
-
         #rendering current score
-        text = pg.font.SysFont('Calibri', 25, True, False).render("Score: "+str(self.board.score),True,WHITE)
+        font = pg.font.SysFont('Calibri', 25, True, False)
+        text = font.render("Score: "+str(self.board.score),True,WHITE)
         surface.blit(text,(0,0))
+        if self.pause:
+            pause_text = font.render("Game paused!",True,WHITE)
+            surface.blit(pause_text,(self.screen_rect.centerx-(pause_text.get_width()/2),0))
